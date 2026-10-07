@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>RTOS Trace Lab — 端点間処理シミュレータ</title>
+<style>
+:root{--bg:#f4f6fa;--surface:#fff;--ink:#172033;--muted:#536177;--line:#dce3ed;--primary:#17365d;--accent:#ad4c0d;--blue:#2463c7;--teal:#087f75;--violet:#7951bd;--red:#b3313d;--soft:#fff2df;--shadow:0 6px 24px #15355706;color-scheme:light}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 system-ui,-apple-system,"Segoe UI","Yu Gothic",sans-serif;overflow-wrap:anywhere}button,input,select{font:inherit}button,a.button{min-height:44px;cursor:pointer}button{border:1px solid var(--line);border-radius:8px;padding:8px 14px;background:var(--surface);color:var(--ink);font-weight:650}button:hover{border-color:var(--blue);background:var(--bg)}button:disabled{opacity:.5;cursor:default}button.primary{background:var(--primary);color:#fff;border-color:var(--primary)}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:3px}input,select{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;min-height:44px;padding:7px 10px;max-width:100%}input[type=number]{width:100%}input[type=range]{padding:0;accent-color:var(--blue)}a{color:var(--blue)}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(25px,3vw,36px);line-height:1.3;letter-spacing:-.04em;margin-bottom:12px}h2{font-size:21px;line-height:1.4;margin-bottom:5px}h3{font-size:16px;margin-bottom:8px}.container{width:min(1280px,calc(100% - 48px));margin:auto}.topbar{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}.topbar .container{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:68px}.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;white-space:nowrap}.mark{display:grid;place-items:center;width:32px;height:32px;background:var(--primary);color:white;border-radius:7px;font-family:monospace;font-size:19px}nav{display:flex;align-items:center;gap:22px}nav a{display:flex;align-items:center;min-height:44px;text-decoration:none;color:var(--muted);font-size:13px;font-weight:650}.skip-link{position:absolute;left:16px;top:-100px;z-index:20;background:var(--surface);padding:12px}.skip-link:focus{top:8px}.hero{padding:36px 0 27px;display:flex;align-items:center;justify-content:space-between;gap:20px}.eyebrow{font-size:11px;letter-spacing:.18em;color:var(--accent);font-weight:800;margin-bottom:12px}.hero p{color:var(--muted);max-width:740px;margin-bottom:0}.badge{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:5px 12px;font-size:12px;white-space:nowrap}.badge i{display:inline-block;background:var(--teal);width:7px;height:7px;border-radius:50%;margin-right:7px}.workspace{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:0}.panel-head{padding:20px 22px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.sub{font-size:12px;color:var(--muted);margin:0}.settings{padding:22px}.settings h2{font-size:17px}.settings label{display:block;font-size:12px;font-weight:650;margin-bottom:5px}.settings select{width:100%}.field{margin-top:16px}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.hint{font-size:11px;color:var(--muted);margin:6px 0 0}.settings hr{border:0;border-top:1px solid var(--line);margin:22px 0}.settings .primary{width:100%;margin-top:20px}.presets{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}.presets button{padding:5px 9px;font-size:11px;flex:1}.error{color:var(--red);font-size:12px;margin:12px 0 0}.dirty{color:var(--accent);font-size:12px;margin:12px 0 0}.right-stack{display:grid;gap:18px}.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.kpi{padding:17px 18px}.kpi .label{font-size:11px;color:var(--muted);font-weight:650}.kpi strong{font:750 28px/1.6 system-ui;letter-spacing:-.035em}.kpi small{font-size:12px;color:var(--muted);margin-left:5px}.kpi .meta{font-size:10px;color:var(--muted)}.kpi.alert strong{color:var(--red)}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.time{font:700 17px ui-monospace,monospace;color:var(--primary);min-width:108px}.player-body{padding:20px 22px}.player-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.player-controls select{font-size:12px}.scrubber{display:flex;align-items:center;gap:12px;margin:15px 0 24px}.scrubber input{flex:1;min-width:0}.scrubber span{font:11px ui-monospace,monospace;color:var(--muted)}.chain{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}.task-card{position:relative;border:1px solid var(--line);border-top:3px solid var(--task);border-radius:9px;padding:13px 15px;min-height:127px;background:var(--bg);transition:box-shadow .15s}.task-card:not(:last-child):after{content:'→';position:absolute;right:-21px;top:48px;color:var(--muted);font-size:20px}.task-card.running{box-shadow:0 0 0 2px var(--task);background:var(--surface)}.task-top{display:flex;align-items:center;justify-content:space-between;gap:5px}.task-name{font-size:13px;font-weight:750}.state{font-size:10px;color:var(--muted)}.running .state{color:var(--task);font-weight:750}.task-id{font:11px ui-monospace,monospace;color:var(--muted);margin:5px 0 12px}.progress{height:5px;border-radius:4px;background:var(--line);overflow:hidden}.progress div{height:100%;background:var(--task);width:0;transition:width .1s linear}.task-detail{font-size:10px;color:var(--muted);margin-top:8px}.background-task{display:flex;gap:14px;align-items:center;border:1px dashed var(--line);padding:10px 14px;border-radius:8px;margin-top:17px;flex-wrap:wrap;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:var(--line);display:inline-block;margin-right:7px}.background-task.active .dot{background:var(--accent)}.cpu{margin-left:auto;font:11px ui-monospace,monospace;color:var(--muted)}.running .dot{background:var(--task);animation:pulse 1s infinite}@keyframes pulse{50%{opacity:.35;transform:scale(.7)}}.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:10px;color:var(--muted);margin:12px 0 0}.legend b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}.chart-wrap{padding:16px 18px 12px}svg{max-width:100%;height:auto;display:block}svg text{font-family:system-ui,sans-serif;fill:var(--muted);font-size:11px}svg .axis{stroke:var(--line)}.footnote{font-size:11px;color:var(--muted);margin:6px 0 0}.section-space{margin-top:28px}.section-title{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:15px}.table-wrap{overflow-x:auto;max-width:100%;border-radius:10px}table{width:100%;border-collapse:collapse;text-align:left;font-size:12px;white-space:nowrap}caption{text-align:left;padding:12px 18px;font-size:11px;color:var(--muted)}th{font-weight:650;color:var(--muted);background:var(--bg);font-size:11px}td,th{padding:11px 15px;border-bottom:1px solid var(--line)}tbody tr:last-child td{border:0}td input{width:90px!important;font-size:12px;padding:5px 7px}td input:disabled{background:var(--bg);color:var(--muted)}.task-key{font-weight:750}.color-line{display:inline-block;width:3px;height:14px;vertical-align:middle;margin-right:8px}.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.result-summary{padding:16px 20px;color:var(--muted);font-size:12px}.result-summary strong{color:var(--ink)}.status-tag{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;background:#e7f5ef;color:#146249}.status-tag.soft{background:var(--soft);color:var(--accent)}.status-tag.hard{background:#fde9ea;color:var(--red)}.sample-btn{min-height:32px;font-size:11px;padding:3px 8px}.sample-btn[aria-pressed=true]{border-color:var(--blue);color:var(--blue)}.explain-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.explain-card{padding:22px}.number{display:block;font:700 12px ui-monospace,monospace;color:var(--accent);margin-bottom:12px}.explain-card p{font-size:13px;color:var(--muted);margin-bottom:0}.callout{border-left:3px solid var(--accent);padding:16px 20px;background:var(--soft);font-size:13px;border-radius:0 8px 8px 0;margin-top:18px}.callout p{margin:4px 0 0}.details-body{padding:0 22px 20px;font-size:13px;color:var(--muted)}details{margin-top:18px}summary{padding:18px 22px;cursor:pointer;font-weight:650;min-height:44px}.formula{font:13px ui-monospace,monospace;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:6px}.footer{margin-top:32px;padding:20px 0 30px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;font-size:11px;color:var(--muted)}.screen-reader{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.empty{padding:24px;color:var(--muted);font-size:12px;text-align:center}.result-scroll{max-height:310px;overflow-y:auto}.section-nav{display:flex;gap:8px;justify-content:end;margin-top:20px}.section-nav a{min-height:44px;display:inline-flex;align-items:center;padding:8px 15px;text-decoration:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;font-size:12px}.print-only{display:none}
+@media(prefers-color-scheme:dark){:root{--bg:#111b2a;--surface:#1a2637;--ink:#edf2fa;--muted:#b1bfd2;--line:#35465f;--primary:#31598a;--accent:#ffb46a;--blue:#80adff;--teal:#5bd0bf;--violet:#bba1ef;--red:#ff929c;--soft:#352b23;color-scheme:dark}.time{color:var(--ink)}.status-tag.soft{color:#f3b973;background:#382d22}.status-tag.hard{color:#ffa8af;background:#43282e}.status-tag{color:#92dfbd;background:#203d35}}
+@media(max-width:1050px){.workspace{grid-template-columns:260px minmax(0,1fr)}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.chain{gap:18px}.task-card{padding:12px 9px}.task-card:not(:last-child):after{right:-17px}.result-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.container{width:calc(100% - 32px)}.topbar .container{min-height:60px;flex-wrap:wrap;gap:0;padding:10px 0}.brand{font-size:14px}nav{gap:12px}nav a{font-size:11px}.hero{padding:25px 0;display:block}.hero .badge{display:inline-block;margin-top:14px}.workspace{grid-template-columns:1fr}.settings{padding:18px}.settings-layout{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.settings .field{margin-top:12px}.settings hr{margin:16px 0}.explain-grid{grid-template-columns:1fr}.panel-head{padding:16px}.player-body{padding:16px}.chain{gap:12px}.task-card{padding:10px 7px}.task-card:not(:last-child):after{right:-12px;font-size:15px}.task-name{font-size:11px}.task-top{display:block}.task-detail{font-size:9px}.task-id{font-size:10px}.kpi{padding:12px 14px}.kpi strong{font-size:26px}.footer{display:block}.section-title{align-items:start;flex-wrap:wrap}}
+.running .state:before{content:'';display:inline-block;width:6px;height:6px;background:currentColor;border-radius:50%;margin-right:4px;animation:pulse 1s infinite}.background-task.active .dot{animation:pulse 1s infinite}
+.sample-btn{min-height:44px}
+@media(max-width:760px){.task-top .state{display:block;margin-top:3px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
+@media print{nav,.screen-only,.settings,button,.scrubber{display:none!important}.print-only{display:block}body{background:#fff;color:#000;font-size:11px}.container{width:100%}.topbar{position:static}.workspace,.result-grid{display:block}.right-stack{display:block}.panel{box-shadow:none;margin-bottom:14px}.kpi-grid{grid-template-columns:repeat(4,1fr)}.panel,section,.explain-card{break-inside:avoid}svg text{fill:#333}.result-scroll{max-height:none;overflow:visible}.table-wrap{overflow:visible}table{white-space:normal}details .details-body{display:block}.hero{padding:16px 0}.footer{margin-top:14px}.section-space{margin-top:18px}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">本文へ移動</a>
+<header class="topbar"><div class="container"><div class="brand"><span class="mark" aria-hidden="true">≋</span> RTOS Trace Lab</div><nav aria-label="目次"><a href="#simulator">シミュレーション</a><a href="#tasks">タスク設定</a><a href="#results">結果分析</a><a href="#guide">解説</a></nav></div></header>
+<main class="container" id="main">
+<div class="hero"><div><div class="eyebrow">SCHEDULING / END-TO-END LATENCY</div><h1>タスクの実行から、端点間の遅れを知る。</h1><p>センサ入力 → 制御演算 → 出力。その間に起こる待機と割込みを、<br class="screen-only">ひとつのタイムラインで追いかける RTOS シミュレーション。</p></div><span class="badge"><i aria-hidden="true"></i>単一 HTML · オフライン対応</span></div>
+<noscript><div class="callout">解説はこのまま読めます。シミュレーションを操作するにはブラウザの JavaScript を有効にしてください。</div></noscript>
+<section id="simulator" aria-label="シミュレーション">
+<div class="workspace">
+<aside class="panel settings screen-only" aria-labelledby="settings-title"><div class="eyebrow">CONFIGURATION</div><h2 id="settings-title">実験条件</h2><p class="sub">サンプル値を変更して比較できます。</p><div class="presets" aria-label="プリセット"><button type="button" data-preset="normal">基本</button><button type="button" data-preset="aligned">位相調整</button><button type="button" data-preset="overload">高負荷</button></div>
+<form id="config-form"><div class="settings-layout"><div class="field"><label for="mode">データの受渡し</label><select id="mode"><option value="periodic">周期起動・最新値を読取</option><option value="event">前段完了で次段を起動</option></select><p class="hint" id="mode-hint">各段は独立周期。実行開始時に最新の完了データを読みます。</p></div><div class="field"><label for="policy">スケジューリング</label><select id="policy"><option value="fp">固定優先度（FP）</option><option value="rm">Rate Monotonic（RM）</option><option value="edf">Earliest Deadline First（EDF）</option></select><p class="hint">単一 CPU・プリエンプティブ実行。</p></div><div class="field field-row"><div><label for="horizon">観測時間 / ms</label><input id="horizon" type="number" min="20" max="2000" step="0.1" value="200" required></div><div><label for="seed">乱数シード</label><input id="seed" type="number" min="1" max="4294967295" step="1" value="42" required></div></div><div class="field"><label for="jitter">実行時間のばらつき / %</label><input id="jitter" type="number" min="0" max="50" step="1" value="0" required><p class="hint">C の ±指定率を一様分布で生成。シード固定で再現できます。</p></div></div><hr><h3>端点間の時間制約</h3><div class="field-row"><div><label for="soft">ソフト期限 / ms</label><input id="soft" type="number" min="0.1" max="5000" step="0.1" value="20" required></div><div><label for="hard">ハード期限 / ms</label><input id="hard" type="number" min="0.1" max="5000" step="0.1" value="30" required></div></div><p class="hint">T1 起動から、そのデータの最初の T3 完了まで。</p><button class="primary" type="submit">条件を適用して再計算</button><p id="dirty" class="dirty" hidden>未適用の変更があります。再計算で反映します。</p><p id="error" class="error" role="alert" hidden></p></form></aside>
+<div class="right-stack"><div class="kpi-grid" aria-label="全観測区間の結果"><div class="panel kpi"><div class="label">最大端点間時間</div><strong id="k-max">—</strong><small>ms</small><div class="meta">観測した完了入力の最大値</div></div><div class="panel kpi"><div class="label">平均端点間時間</div><strong id="k-mean">—</strong><small>ms</small><div class="meta" id="k-samples">全区間の完了入力</div></div><div class="panel kpi"><div class="label">実測 CPU 使用率</div><strong id="k-util">—</strong><small>%</small><div class="meta">CPU 実行時間 / 観測時間</div></div><div class="panel kpi" id="hard-card"><div class="label">ハード期限超過</div><strong id="k-hard">—</strong><small>件</small><div class="meta">完了入力の端点間期限超過</div></div></div>
+<div class="panel"><div class="panel-head"><div><h2>データの流れ</h2><p class="sub">再生位置における CPU と各タスクの状態</p></div><span class="badge" id="play-status" role="status">停止中</span></div><div class="player-body"><div class="player-controls screen-only"><div class="toolbar"><button id="play" class="primary" aria-label="シミュレーションを再生">▶ 再生</button><button id="step">1 ms 進む</button><button id="reset">先頭へ</button></div><div class="toolbar"><label for="speed" class="sub">速度</label><select id="speed"><option value="5">5 ms / 秒</option><option value="20" selected>20 ms / 秒</option><option value="100">100 ms / 秒</option></select><output class="time" id="clock">0.0 ms</output></div></div><div class="scrubber screen-only"><span>0</span><input id="seek" aria-label="再生時刻" type="range" min="0" max="2000" value="0" step="1"><span id="range-end">200 ms</span></div><div class="chain" id="chain"><div class="task-card" style="--task:var(--blue)" id="card-0"><div class="task-top"><span class="task-name">センサ入力</span><span class="state">未実行</span></div><div class="task-id">T1 · INPUT</div><div class="progress"><div></div></div><div class="task-detail">起動待ち</div></div><div class="task-card" style="--task:var(--teal)" id="card-1"><div class="task-top"><span class="task-name">制御演算</span><span class="state">未実行</span></div><div class="task-id">T2 · PROCESS</div><div class="progress"><div></div></div><div class="task-detail">起動待ち</div></div><div class="task-card" style="--task:var(--violet)" id="card-2"><div class="task-top"><span class="task-name">出力処理</span><span class="state">未実行</span></div><div class="task-id">T3 · OUTPUT</div><div class="progress"><div></div></div><div class="task-detail">起動待ち</div></div></div><div class="background-task" id="background"><span><span class="dot" aria-hidden="true"></span><strong>T4 · 周期監視</strong></span><span id="bg-state">起動待ち</span><span class="cpu" id="cpu">CPU —</span></div><p class="footnote">色枠は実行中、バーは先頭ジョブの進捗。待機中のジョブは CPU を使いません。</p></div></div>
+<div class="panel"><div class="panel-head"><div><h2>実行タイムライン</h2><p class="sub">全観測区間 · 縦線は再生位置 · 色付き区間は CPU 実行</p></div><button id="clear-selection" class="screen-only" hidden>選択解除</button></div><div class="chart-wrap"><svg id="timeline" viewBox="0 0 900 230" role="img" aria-label="タスクごとの実行時間を示すガントチャート"><text x="20" y="30">再計算すると実行結果を表示します。</text></svg><div class="legend"><span><b style="background:var(--blue)"></b>T1 入力</span><span><b style="background:var(--teal)"></b>T2 演算</span><span><b style="background:var(--violet)"></b>T3 出力</span><span><b style="background:var(--accent)"></b>T4 監視</span><span>空白 = 未実行／CPU 待ち</span></div><p class="footnote" id="timeline-note">結果表の「追跡」で、同じ入力データを処理した区間を強調します。</p></div></div></div></div></section>
+<section id="tasks" class="section-space"><div class="section-title"><div><div class="eyebrow">TASK SET</div><h2>タスクと起動条件</h2><p class="sub">時間単位は ms。優先度は小さい数ほど高く、同値は T1 → T4 の順。</p></div><button id="export-config" class="screen-only">設定 JSON を保存</button></div><div class="panel table-wrap"><table><caption>説明用の架空タスクセット。C は実行時間、T は周期、D は起動からの相対期限です。</caption><thead><tr><th scope="col">タスク / 役割</th><th scope="col">周期 T</th><th scope="col">実行時間 C</th><th scope="col">位相 O</th><th scope="col">優先度 P</th><th scope="col">相対期限 D</th></tr></thead><tbody id="task-inputs"></tbody></table></div><p class="footnote" id="task-hint">周期起動は O + kT。同じタスクのジョブは FIFO で実行され、遅れても破棄しません。</p></section>
+<section id="results" class="section-space"><div class="section-title"><div><div class="eyebrow">OBSERVATIONS</div><h2>端点間の遅れを分析する</h2><p class="sub" id="result-config">全観測区間の集計。再生速度は計算結果に影響しません。</p></div><button id="export-csv" class="screen-only">結果 CSV を保存</button></div><div class="result-grid"><div class="panel"><div class="panel-head"><div><h3>端点間処理時間の分布</h3><p class="sub">入力ごとの最初の出力だけを集計</p></div></div><div class="chart-wrap"><svg id="histogram" viewBox="0 0 550 230" role="img" aria-label="端点間処理時間の度数分布"></svg></div><div class="result-summary" id="result-summary">再計算後に結果を表示します。</div></div><div class="panel"><div class="panel-head"><div><h3>入力データごとの結果</h3><p class="sub">入力 ID 順 · 期限ちょうどの完了は超過に含めません</p></div></div><div class="table-wrap result-scroll"><table><caption id="sample-caption">観測済みの端点間処理</caption><thead><tr><th scope="col">入力</th><th scope="col">起動 → 完了</th><th scope="col">遅れ</th><th scope="col">判定</th><th scope="col" class="screen-only">追跡</th></tr></thead><tbody id="sample-rows"></tbody></table><div class="empty" id="no-samples" hidden>出力に到達した入力がありません。観測時間、起動位相、CPU 負荷を確認してください。</div></div></div></div><div class="callout" id="observation" role="status">有限区間での観測結果です。全条件に対する最悪時間の保証ではありません。</div></section>
+<section id="guide" class="section-space"><div class="section-title"><div><div class="eyebrow">HOW IT WORKS</div><h2>何が端点間の時間を増やすのか</h2><p class="sub">処理時間の合計だけでは、入力から出力までの時間は決まりません。</p></div><button class="screen-only" id="print">印刷 / PDF</button></div><div class="explain-grid"><article class="panel explain-card"><span class="number">01 / RELEASE & WAIT</span><h3>次の起動を待つ時間</h3><p>周期起動では、前段の処理が終わっても次段がすぐ動くとは限りません。次段の周期と位相を変更すると、データ読取りまでの待ち時間が変わります。「位相調整」と「基本」を比較してみてください。</p></article><article class="panel explain-card"><span class="number">02 / PREEMPTION</span><h3>CPU を譲る時間</h3><p>実行可能なジョブの中から、選択した方式で最優先のものを実行します。より優先されるジョブの到着は実行中の処理を中断します。T4 の負荷を増やすと、他のタスクが待つ様子を確認できます。</p></article><article class="panel explain-card"><span class="number">03 / END-TO-END</span><h3>同じデータの経路を追う</h3><p>入力 ID をデータとともに引き継ぎ、T1 の起動からそのデータの最初の T3 完了までを測ります。周期の違いで同じ入力が複数回出力された場合、最初の出力のみを数えます。</p></article></div><div class="callout"><strong>ソフト期限とハード期限</strong><p>ソフト期限（DLS）は許容する遅れの評価基準、ハード期限（DLH）は超過を許容できない時間制約です。このモックでは超過件数と観測比率を表示します。ソフト超過が許容可能かどうかは、対象システムの要求で決まります。</p></div>
+<details class="panel" open><summary>計算モデルと結果の読み方</summary><div class="details-body"><p class="formula">端点間時間 = 最初の T3 完了時刻 − 引き継いだ入力の T1 起動時刻</p><p>単一 CPU、0.1 ms 刻みの離散時間モデルです。起動・実行・期限は 0.1 ms 単位、同一時刻では前の区間の完了処理 → 周期起動 → 選択 → 実行の順です。コンテキスト切替コストは 0、タスク間の共有データへのアクセスは瞬時とします。</p><p><strong>周期起動：</strong>T1〜T4 がそれぞれ周期起動します。T2/T3 は最初に CPU を得た時点の前段完了データを読み、プリエンプト後もそのデータを保持します。前段データがまだなければ空データとして完了します。共有バッファは最新値ひとつだけなので、入力を読み飛ばす場合があります。</p><p><strong>前段完了起動：</strong>T1 と T4 は周期起動、T2/T3 は前段の完了で FIFO ジョブを追加します。受け渡すデータは各ジョブに保持します。このモードの T2/T3 の周期・位相は使いません。RM もこのモードでは選択できません。</p><p><strong>選択方式：</strong>FP は P が小さい順。RM は周期 T が短い順。EDF はジョブの絶対期限（起動 + D）が早い順。同点はタスク番号、同一タスク内は FIFO です。T4 は通常の周期監視タスクで、実機の ISR を再現するものではありません。</p><p><strong>全区間集計：</strong>CPU 使用率は実際に実行した刻み数から計算します。入力未到達件数は読み飛ばしと観測終了時点の処理途中を含みます。完了入力だけの期限超過率とは別に、未到達入力のハード期限経過も表示します。タスク相対期限の超過件数は、未完了で期限を過ぎたジョブも含みます。</p><p><strong>再現性：</strong>ばらつきは説明用の一様分布で、起動ジッタはありません。同じ設定と乱数シードで同じ結果になります。最大値は観測最大値であり、WCRT の理論値ではありません。マルチコア、ネットワーク、排他資源、優先度継承、静的テーブル探索、数学的な保証は対象外です。</p></div></details>
+<details class="panel"><summary>参照資料とモックで追加した仕様</summary><div class="details-body"><p>『ECU 統合に関するスケジューリング検証手法および端点間の時間保障検証手法の規定 報告書』第1.00版、2009年2月18日、株式会社ヴィッツ、文書番号 CRsC-00483-j。用語集および第4.1.1節（本文18〜26ページ）の優先度ベーススケジューリング検証、時間分布と期限比較を参考にしています。</p><p>報告書の理論的最大遅れ、数学モデル、2回連続ミスなし条件探索を実装したものではありません。「連続ソフト超過」は、隣り合う入力 ID がともに観測され、超過した場合の集計です。条件探索による保証とは異なります。報告書の例題の再計算や掲載結果の再現も行っていません。</p><p>添付『Single_HTML生成用_rev2.md』はオフライン、レスポンシブ、本文構造、印刷への対応を参考にしました。アニメーションとシミュレーションは今回の依頼に合わせた追加機能です。タスク名、数値、2種類の受渡しモデル、EDF は説明用に作成した仕様です。</p></div></details><div class="section-nav screen-only"><a href="#simulator">↑ シミュレーションへ</a></div></section>
+<footer class="footer"><span>RTOS Trace Lab · v1.0 · 2026-10-07<br>端点間処理を学ぶための動作モック</span><span>外部ライブラリ・通信不要<br>実機の時間保証には別途検証が必要です。</span></footer>
+</main>
+<script>
+'use strict';
+(() => {
+const $ = id => document.getElementById(id);
+const DT = .1;
+const colors = ['var(--blue)','var(--teal)','var(--violet)','var(--accent)'];
+const names = ['センサ入力','制御演算','出力処理','周期監視'];
+const baseTasks = [
+ {period:10,cost:1,offset:0,priority:2,deadline:10},
+ {period:20,cost:3,offset:5,priority:3,deadline:20},
+ {period:20,cost:1,offset:0,priority:4,deadline:20},
+ {period:5,cost:1,offset:0,priority:1,deadline:5}
+];
+const clone = x => JSON.parse(JSON.stringify(x));
+const fmt = x => Number(x).toFixed(1);
+const ticks = x => Math.round(x / DT);
+let result = null, position = 0, playing = false, selected = null, lastFrame = 0, frameId = null, dirty = false;
+const taskBody = $('task-inputs');
+for(let i=0;i<4;i++) {
+ const tr=document.createElement('tr');
+ tr.innerHTML='<td><span class="color-line" style="background:'+colors[i]+'"></span><span class="task-key">T'+(i+1)+'</span> · '+names[i]+'</td>';
+ for(const [key,label,min,max,step] of [['period','周期',.1,2000,.1],['cost','実行時間',.1,2000,.1],['offset','位相',0,2000,.1],['priority','優先度',1,99,1],['deadline','相対期限',.1,5000,.1]]) {
+  const td=document.createElement('td'); const input=document.createElement('input');
+  input.type='number';input.id='t'+i+'-'+key;input.value=baseTasks[i][key];input.min=min;input.max=max;input.step=step;input.required=true;input.setAttribute('aria-label','T'+(i+1)+' '+label);input.setAttribute('form','config-form');td.append(input);tr.append(td);
+ }
+ taskBody.append(tr);
+}
+function readConfig() {
+ const c={mode:$('mode').value,policy:$('policy').value,horizon:+$('horizon').value,seed:+$('seed').value,jitter:+$('jitter').value,soft:+$('soft').value,hard:+$('hard').value,tasks:[]};
+ for(let i=0;i<4;i++){const t={};for(const key of Object.keys(baseTasks[i]))t[key]=+$('t'+i+'-'+key).value;c.tasks.push(t);}
+ return c;
+}
+function validate(c) {
+ if(!['periodic','event'].includes(c.mode)||!['fp','rm','edf'].includes(c.policy))throw Error('受渡し・選択方式が不正です。');
+ if(c.mode==='event'&&c.policy==='rm')throw Error('前段完了起動では FP または EDF を選択してください。');
+ for(const [k,min,max] of [['horizon',20,2000],['seed',1,4294967295],['jitter',0,50],['soft',.1,5000],['hard',.1,5000]])if(!Number.isFinite(c[k])||c[k]<min||c[k]>max)throw Error('実験条件の範囲を確認してください。');
+ if(!Number.isInteger(c.seed)||!Number.isInteger(c.jitter))throw Error('シードとばらつき率は整数で入力してください。');
+ if(c.soft>c.hard)throw Error('ソフト期限はハード期限以下にしてください。');
+ const aligned=x=>Math.abs(x*10-Math.round(x*10))<1e-7;
+ for(const k of ['horizon','soft','hard'])if(!aligned(c[k]))throw Error('時間は 0.1 ms 刻みで入力してください。');
+ for(const [i,t] of c.tasks.entries())for(const [k,v] of Object.entries(t)) {
+  const min=k==='offset'?0:k==='priority'?1:.1, max=k==='priority'?99:k==='deadline'?5000:2000;
+  if(!Number.isFinite(v)||v<min||v>max||!aligned(v)||(k==='priority'&&!Number.isInteger(v)))throw Error('T'+(i+1)+' の時間・優先度の入力範囲を確認してください。');
+ }
+ // Bound rendering and queue size independently of CPU speed.
+ const jobBudget=c.tasks.reduce((n,t,i)=>n+((c.mode==='event'&&(i===1||i===2))?0:Math.ceil(c.horizon/t.period)),0)+(c.mode==='event'?2*Math.ceil(c.horizon/c.tasks[0].period):0);
+ if(jobBudget>6000)throw Error('起動数が多すぎます。観測時間を短くするか周期を長くしてください（上限 6,000 ジョブ）。');
+}
+function simulate(config) {
+ validate(config);
+ const c=clone(config), H=ticks(c.horizon), ts=c.tasks.map(t=>({...t,T:ticks(t.period),C:ticks(t.cost),O:ticks(t.offset),D:ticks(t.deadline)}));
+ let rng=c.seed>>>0;
+ const random=()=>{rng=(Math.imul(1664525,rng)+1013904223)>>>0;return rng/4294967296;};
+ const queues=[[],[],[],[]],latest=[null,null,null,null],jobs=[],sources=[],segments=[],samples=[],seen=new Set(),frames=[];
+ let running=null,busy=0,preemptions=0;
+ function spawn(task,time,data=null) {
+  const spec=ts[task];
+  const variation=c.jitter?1+(random()*2-1)*c.jitter/100:1;
+  const cost=Math.max(1,Math.round(spec.C*variation));
+  const job={id:jobs.length,task,release:time,deadline:time+spec.D,cost,remaining:cost,start:null,finish:null,data,preemptions:0};
+  if(task===0){const source={id:sources.length+1,origin:time};sources.push(source);job.data={...source};}
+  jobs.push(job);queues[task].push(job);return job;
+ }
+ function score(job){return c.policy==='edf'?job.deadline:c.policy==='rm'?ts[job.task].T:ts[job.task].priority;}
+ function release(time){for(let i=0;i<4;i++){if(c.mode==='event'&&(i===1||i===2))continue;const t=ts[i];if(time>=t.O&&(time-t.O)%t.T===0)spawn(i,time);}}
+ function choose(){return queues.map(q=>q[0]).filter(Boolean).sort((a,b)=>score(a)-score(b)||a.task-b.task||a.id-b.id)[0]||null;}
+ function snapshot(time,run){frames.push({time,run:run?run.id:null,tasks:queues.map((q,i)=>({job:q[0]?q[0].id:null,remaining:q[0]?q[0].remaining:0,queued:q.length,data:q[0]?q[0].data:latest[i]}))});}
+ for(let time=0;time<H;time++) {
+  release(time);
+  const next=choose();
+  if(running&&running.remaining>0&&next!==running){running.preemptions++;preemptions++;}
+  running=next;
+  if(next&&next.start===null){next.start=time;if(c.mode==='periodic'&&(next.task===1||next.task===2))next.data=latest[next.task-1]?{...latest[next.task-1]}:null;}
+  snapshot(time,next);
+  if(!next)continue;
+  busy++;
+  const tail=segments[segments.length-1];
+  if(tail&&tail.job===next.id&&tail.end===time)tail.end=time+1;
+  else segments.push({job:next.id,task:next.task,start:time,end:time+1});
+  next.remaining--;
+  if(next.remaining===0){
+   next.finish=time+1;queues[next.task].shift();latest[next.task]=next.data?{...next.data}:null;
+   if(next.task===2&&next.data&&!seen.has(next.data.id)){seen.add(next.data.id);samples.push({id:next.data.id,origin:next.data.origin,finish:time+1,latency:time+1-next.data.origin});}
+   if(c.mode==='event'&&next.task<2)spawn(next.task+1,time+1,next.data?{...next.data}:null);
+   running=null;
+  }
+ }
+ // H is an observation boundary: completed work is counted; no new periodic release at H.
+ snapshot(H,null);
+ samples.sort((a,b)=>a.id-b.id);
+ const soft=ticks(c.soft),hard=ticks(c.hard);
+ const softMiss=samples.filter(s=>s.latency>soft).length, hardMiss=samples.filter(s=>s.latency>hard).length;
+ let longest=0,streak=0,prev=null;
+ for(const s of samples){streak=s.latency>soft?(prev&&s.id===prev.id+1?streak+1:1):0;longest=Math.max(longest,streak);prev=s;}
+ return {config:c,H,ts,jobs,sources,segments,samples,frames,busy,preemptions,softMiss,hardMiss,longest,pending:sources.filter(s=>!seen.has(s.id)),taskMiss:jobs.filter(j=>j.finish===null?H>j.deadline:j.finish>j.deadline).length};
+}
+function modeUI(){
+ const event=$('mode').value==='event';
+ $('policy').querySelector('[value=rm]').disabled=event;
+ if(event&&$('policy').value==='rm')$('policy').value='fp';
+ for(let i=1;i<=2;i++)for(const key of ['period','offset'])$('t'+i+'-'+key).disabled=event;
+ $('mode-hint').textContent=event?'T1/T4 は周期起動。T2/T3 は前段の完了で起動します。':'各段は独立周期。実行開始時に最新の完了データを読みます。';
+ $('task-hint').textContent=event?'T2/T3 の周期と位相は使いません。前段完了でデータ付きのジョブを FIFO へ追加します。':'周期起動は O + kT。同じタスクのジョブは FIFO で実行され、遅れても破棄しません。';
+ for(let i=0;i<4;i++)$('t'+i+'-priority').disabled=$('policy').value!=='fp';
+}
+function pause(){playing=false;if(frameId!==null)cancelAnimationFrame(frameId);frameId=null;$('play').textContent='▶ 再生';$('play').setAttribute('aria-label','シミュレーションを再生');$('play-status').textContent=position>=result?.H?'再生完了':'停止中';}
+function apply(){
+ try{
+  if(!$('config-form').reportValidity())return;
+  const computed=simulate(readConfig());pause();result=computed;position=0;selected=null;dirty=false;$('dirty').hidden=true;$('error').hidden=true;
+  $('seek').max=result.H;$('range-end').textContent=fmt(result.config.horizon)+' ms';$('clear-selection').hidden=true;$('timeline-note').textContent='結果表の「追跡」で、同じ入力データを処理した区間を強調します。';
+  renderSummary();renderTimeline();renderHistogram();renderSamples();renderFrame();
+ }catch(e){$('error').textContent=e.message;$('error').hidden=false;}
+}
+const svgns='http://www.w3.org/2000/svg';
+function node(tag,attrs={},content=null){const el=document.createElementNS(svgns,tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);if(content!==null)el.textContent=content;return el;}
+function svgText(svg,x,y,content,attrs={}){svg.append(node('text',{x,y,...attrs},content));}
+function renderTimeline(){
+ const svg=$('timeline');svg.replaceChildren();svg.append(node('title',{},'全区間のタスク実行。色付きは CPU 実行、縦線は再生位置。'));const left=65,width=810;
+ for(let n=0;n<=10;n++){const x=left+width*n/10;svg.append(node('line',{x1:x,x2:x,y1:24,y2:200,class:'axis'}));svgText(svg,x,221,fmt(result.config.horizon*n/10),{'text-anchor':'middle'});}
+ for(let i=0;i<4;i++){const y=34+i*42;svgText(svg,14,y+19,'T'+(i+1));svg.append(node('rect',{x:left,y,width,height:28,rx:4,fill:'var(--bg)'}));}
+ // Merge no unrelated job boundaries: every segment retains its job and lineage.
+ for(const s of result.segments){const job=result.jobs[s.job],match=selected===null||job.data?.id===selected;const rect=node('rect',{x:left+width*s.start/result.H,y:34+s.task*42,width:Math.max(.35,width*(s.end-s.start)/result.H),height:28,rx:2,fill:colors[s.task],opacity:match?1:.17});rect.append(node('title',{},'T'+(s.task+1)+' / '+fmt(s.start*DT)+'–'+fmt(s.end*DT)+' ms / '+(job.data?'入力 #'+job.data.id:'データなし')));svg.append(rect);}
+ if(selected!==null){const s=result.samples.find(s=>s.id===selected);if(s){const x1=left+width*s.origin/result.H,x2=left+width*s.finish/result.H;svg.append(node('line',{x1,x2,y1:14,y2:14,stroke:'var(--ink)','stroke-width':2}));svgText(svg,(x1+x2)/2,10,'#'+selected+' · '+fmt(s.latency*DT)+' ms',{'text-anchor':'middle'});}}
+ svg.append(node('line',{id:'playhead',x1:left,x2:left,y1:24,y2:200,stroke:'var(--ink)','stroke-width':1.5,'stroke-dasharray':'4 3'}));
+}
+function renderHistogram(){
+ const svg=$('histogram');svg.replaceChildren();svg.append(node('title',{},'完了入力の端点間処理時間の度数分布。破線はソフト・ハード期限。'));
+ const vals=result.samples.map(s=>s.latency*DT),max=Math.max(result.config.hard*1.15,vals.length?Math.max(...vals)*1.1:0,1),bins=10,counts=Array(bins).fill(0);
+ for(const v of vals)counts[Math.min(bins-1,Math.floor(v/max*bins))]++;
+ const peak=Math.max(1,...counts),left=42,bottom=185,w=480,h=145;
+ for(let i=0;i<=4;i++){const y=bottom-h*i/4;svg.append(node('line',{x1:left,x2:left+w,y1:y,y2:y,class:'axis'}));svgText(svg,30,y+4,fmt(peak*i/4),{'text-anchor':'end'});}
+ counts.forEach((n,i)=>{const rect=node('rect',{x:left+i*w/bins+3,y:bottom-n/peak*h,width:w/bins-6,height:n/peak*h,rx:3,fill:'var(--blue)'});rect.append(node('title',{},fmt(i*max/bins)+' ≤ 遅れ < '+fmt((i+1)*max/bins)+' ms: '+n+' 件'));svg.append(rect);});
+ for(let i=0;i<=5;i++)svgText(svg,left+w*i/5,205,fmt(max*i/5),{'text-anchor':'middle'});
+ svgText(svg,left,22,'入力数 / 件');svgText(svg,left+w,225,'端点間時間 / ms',{'text-anchor':'end'});
+ for(const [key,color,label,y] of [['soft','var(--accent)','DLS',32],['hard','var(--red)','DLH',18]]){const x=left+w*result.config[key]/max;svg.append(node('line',{x1:x,x2:x,y1:40,y2:bottom,stroke:color,'stroke-dasharray':'4 3','stroke-width':1.5}));svgText(svg,x,y,label+' '+fmt(result.config[key]),{'text-anchor':'middle',style:'fill:'+color});}
+ if(!vals.length)svgText(svg,left+w/2,112,'完了入力なし',{'text-anchor':'middle'});
+}
+function renderSummary(){
+ const r=result,n=r.samples.length,lat=r.samples.map(s=>s.latency*DT),cfg=r.config;
+ $('k-max').textContent=n?fmt(Math.max(...lat)):'—';$('k-mean').textContent=n?fmt(lat.reduce((a,b)=>a+b,0)/n):'—';$('k-samples').textContent='全区間 · '+n+' 入力が出力に到達';$('k-util').textContent=fmt(r.busy/r.H*100);$('k-hard').textContent=r.hardMiss;$('hard-card').classList.toggle('alert',r.hardMiss>0);
+ $('result-summary').innerHTML='<strong>ソフト超過 '+r.softMiss+' / '+n+' 件'+(n?'（'+fmt(r.softMiss/n*100)+'%）':'')+'</strong><br>観測された連続ソフト超過：最大 '+r.longest+' 入力<br>未到達入力：'+r.pending.length+' / '+r.sources.length+' 件（読み飛ばし・処理途中を含む）';
+ const expired=r.pending.filter(s=>r.H-s.origin>ticks(cfg.hard)).length;
+ $('observation').textContent='全区間 '+fmt(cfg.horizon)+' ms：タスク相対期限超過 '+r.taskMiss+' 件 ／ 未完了ジョブ '+r.jobs.filter(j=>j.finish===null).length+' 件 ／ プリエンプト '+r.preemptions+' 回。未到達入力のうち '+expired+' 件はハード期限を経過しています。完了入力の最大値と超過率だけでは、全入力の時間制約を保証できません。';
+ $('result-config').textContent=(cfg.mode==='periodic'?'周期起動':'前段完了起動')+' · '+cfg.policy.toUpperCase()+' · シード '+cfg.seed+' · ばらつき ±'+cfg.jitter+'% · 全観測区間の集計';
+ $('sample-caption').textContent=n+' 入力の最初の出力を計測（未到達入力は含みません）';
+}
+function renderSamples(){
+ const body=$('sample-rows');body.replaceChildren();$('no-samples').hidden=result.samples.length>0;
+ for(const s of result.samples){const hard=s.latency>ticks(result.config.hard),soft=s.latency>ticks(result.config.soft),tr=document.createElement('tr');
+  tr.innerHTML='<td>#'+s.id+'</td><td>'+fmt(s.origin*DT)+' → '+fmt(s.finish*DT)+'</td><td><strong>'+fmt(s.latency*DT)+'</strong> ms</td><td><span class="status-tag '+(hard?'hard':soft?'soft':'')+'">'+(hard?'ハード超過':soft?'ソフト超過':'期限内')+'</span></td><td class="screen-only"><button class="sample-btn" data-source="'+s.id+'" aria-pressed="'+(selected===s.id)+'" aria-label="入力 '+s.id+' の経路を追跡">追跡</button></td>';body.append(tr);
+ }
+}
+function renderFrame(){
+ if(!result)return;const time=Math.min(result.H,Math.max(0,Math.floor(position))),f=result.frames[time];
+ $('clock').textContent=fmt(time*DT)+' ms';$('seek').value=time;
+ const run=f.run===null?null:result.jobs[f.run];$('cpu').textContent=run?'CPU → T'+(run.task+1):'CPU → IDLE';
+ for(let i=0;i<3;i++){
+  const card=$('card-'+i),state=f.tasks[i],job=state.job===null?null:result.jobs[state.job],active=run?.task===i;
+  card.classList.toggle('running',active);card.querySelector('.state').textContent=active?'実行中':job?(job.start!==null&&job.start<=time?'中断 / 待機':'実行待ち'):'起動待ち';
+  const progress=job?(job.cost-state.remaining)/job.cost*100:0;card.querySelector('.progress div').style.width=progress+'%';
+  const packet=state.data?'入力 #'+state.data.id:(i===0?'入力なし':'前段データなし');
+  card.querySelector('.task-detail').textContent=packet+(job?' · 残り '+fmt(state.remaining*DT)+' ms':' · 完了バッファ')+(state.queued>1?' / '+state.queued+' 待機':'');
+ }
+ $('background').classList.toggle('active',run?.task===3);const bg=f.tasks[3];$('bg-state').textContent=run?.task===3?'実行中 · 残り '+fmt(bg.remaining*DT)+' ms':bg.job!==null?'CPU 待ち':'起動待ち';
+ const x=65+810*time/result.H;$('playhead')?.setAttribute('x1',x);$('playhead')?.setAttribute('x2',x);
+ $('play-status').textContent=playing?'再生中':time===result.H?'再生完了':'停止中';
+}
+function animate(now){if(!playing)return;if(lastFrame)position=Math.min(result.H,position+Math.min(now-lastFrame,1000)/1000*+$('speed').value/DT);lastFrame=now;renderFrame();if(position>=result.H){pause();return;}frameId=requestAnimationFrame(animate);}
+function markDirty(){dirty=true;$('dirty').hidden=false;}
+$('config-form').addEventListener('submit',e=>{e.preventDefault();apply();});
+document.querySelectorAll('#config-form input,#config-form select,#task-inputs input').forEach(el=>el.addEventListener('input',()=>{modeUI();markDirty();}));
+$('play').addEventListener('click',()=>{if(!result)return;if(playing){pause();return;}if(position>=result.H)position=0;playing=true;lastFrame=0;$('play').textContent='❚❚ 一時停止';$('play').setAttribute('aria-label','シミュレーションを一時停止');renderFrame();frameId=requestAnimationFrame(animate);});
+$('reset').addEventListener('click',()=>{pause();position=0;renderFrame();});
+$('step').addEventListener('click',()=>{pause();position=Math.min(result.H,Math.floor(position)+ticks(1));renderFrame();});
+$('seek').addEventListener('input',()=>{pause();position=+$('seek').value;renderFrame();});
+$('sample-rows').addEventListener('click',e=>{const button=e.target.closest('[data-source]');if(!button)return;pause();selected=+button.dataset.source;const sample=result.samples.find(s=>s.id===selected);position=sample.origin;$('clear-selection').hidden=false;$('timeline-note').textContent='入力 #'+selected+' を処理した全区間を強調。上部の線は初回出力までの '+fmt(sample.latency*DT)+' ms。';renderTimeline();renderSamples();renderFrame();});
+$('clear-selection').addEventListener('click',()=>{selected=null;$('clear-selection').hidden=true;$('timeline-note').textContent='結果表の「追跡」で、同じ入力データを処理した区間を強調します。';renderTimeline();renderSamples();renderFrame();});
+function preset(key){pause();const ts=clone(baseTasks);if(key==='aligned'){ts[1].offset=2;ts[2].offset=6;}if(key==='overload')ts[3].cost=4;
+ for(const [id,value] of Object.entries({mode:'periodic',policy:'fp',horizon:200,seed:42,jitter:0,soft:20,hard:30}))$(id).value=value;
+ ts.forEach((t,i)=>Object.entries(t).forEach(([k,v])=>$('t'+i+'-'+k).value=v));modeUI();apply();
+}
+document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>preset(b.dataset.preset)));
+function download(name,contents,type){const url=URL.createObjectURL(new Blob([contents],{type})),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+$('export-config').addEventListener('click',()=>download('rtos-trace-config.json',JSON.stringify({model:'RTOS Trace Lab v1.0',timeStepMs:DT,...result.config},null,2),'application/json'));
+$('export-csv').addEventListener('click',()=>{const c=result.config;const rows=[['input_id','origin_ms','first_output_ms','latency_ms','soft_deadline_ms','hard_deadline_ms','status','mode','policy','seed']];for(const s of result.sources){const sample=result.samples.find(x=>x.id===s.id);rows.push([s.id,fmt(s.origin*DT),sample?fmt(sample.finish*DT):'',sample?fmt(sample.latency*DT):'',c.soft,c.hard,sample?(sample.latency>ticks(c.hard)?'hard_miss':sample.latency>ticks(c.soft)?'soft_miss':'within_deadlines'):'not_observed',c.mode,c.policy,c.seed]);}download('rtos-end-to-end.csv','\uFEFF'+rows.map(r=>r.join(',')).join('\r\n'),'text/csv;charset=utf-8');});
+$('print').addEventListener('click',()=>window.print());
+let printedDetails=[];
+window.addEventListener('beforeprint',()=>{printedDetails=[...document.querySelectorAll('details')].filter(d=>!d.open);printedDetails.forEach(d=>d.open=true);});
+window.addEventListener('afterprint',()=>{printedDetails.forEach(d=>d.open=false);printedDetails=[];});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
+// Expose a deterministic, side-effect-free engine for verification and experimentation.
+window.RTOSLab={simulate,readConfig,get result(){return result;},get position(){return position;}};
+modeUI();apply();
+})();
+</script>
+</body>
+</html>
