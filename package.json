@@ -1,0 +1,17 @@
+{
+  "name": "schedmoc",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Single-file RTOS scheduling and end-to-end latency simulator",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "test": "node -e \"process.env.CHROMIUM_PATH ||= require('playwright').chromium.executablePath(); require('./tests/verify.cjs');\"",
+    "test:install": "playwright install chromium",
+    "test:install:ci": "playwright install --with-deps chromium"
+  },
+  "devDependencies": {
+    "playwright": "1.64.0"
+  }
+}

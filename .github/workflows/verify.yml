@@ -1,0 +1,45 @@
+name: Verify RTOS simulator
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Install Chromium and system dependencies
+        run: npm run test:install:ci
+
+      - name: Run existing verification
+        run: npm test
+
+      - name: Upload verification outputs
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: rtos-verification
+          # Keep the existing output path in tests/verify.cjs unchanged.
+          path: ${{ github.workspace }}/../scratch/rtos-verification/
+          if-no-files-found: warn
+          retention-days: 14

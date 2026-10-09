@@ -28,15 +28,40 @@ RTOS タスクの端点間処理を可視化する、オフライン対応のシ
 
 ## 検証
 
-このクラウド環境では Playwright と `/usr/bin/chromium` が利用できます。
+検証には Node.js 24.x、npm、Playwright と Chromium が必要です。HTML の閲覧にはこれらは不要です。
+Playwright のバージョンは `package.json` で固定し、依存関係は `package-lock.json` に記録しています。
+リポジトリのルートで次のコマンドを実行してください。
 
 ```sh
-node tests/verify.cjs
+npm ci
+npm run test:install
+npm test
 ```
 
-検証用にローカル HTTP サーバーを一時起動し、終了時に停止します。既知の実行順、割込み、データ伝播、期限境界、過負荷、乱数再現性、35 通りの設定での CPU・データ整合性、操作、CSV/JSON 保存を確認します。外部ネットワークを遮断した状態でも操作を検証します。画面幅 360/768/1280 px、ダークモード、動きの低減、印刷、JavaScript 無効の表示も確認します。スクリーンショット等はチェックアウト外の `/workspace/scratch/rtos-verification` に出力します。
+Linux で Chromium のシステム依存ライブラリも必要な場合は、`npm run test:install` の代わりに `npm run test:install:ci` を実行してください。システム依存ライブラリの導入には管理者権限が必要な場合があります。
 
-別の環境では、検証用に Playwright と Chromium が必要です（HTML の実行には不要）。Chromium の場所は `CHROMIUM_PATH` で指定できます。
+`npm test` は Playwright が管理する Chromium の実行パスを `CHROMIUM_PATH` に設定し、既存の `tests/verify.cjs` を実行します。すでに `CHROMIUM_PATH` を指定している場合は、その値を優先します。システムの Chromium を使う例は次のとおりです。
+
+```sh
+CHROMIUM_PATH=/usr/bin/chromium npm test
+```
+
+検証用にローカル HTTP サーバーを一時起動し、正常終了時に停止します。既知の実行順、割込み、データ伝播、期限境界、過負荷、乱数再現性、35 通りの設定での CPU・データ整合性、操作、CSV/JSON 保存を確認します。外部ネットワークを遮断した状態でも操作を検証します。画面幅 360/768/1280 px、ダークモード、動きの低減、印刷、JavaScript 無効の表示も確認します。
+
+スクリーンショット、印刷 PDF、CSV、JSON は、既存スクリプトの指定どおり `<リポジトリの親ディレクトリ>/scratch/rtos-verification/` に出力します。このディレクトリへの書込み権限が必要です。検証に成功すると標準出力に `"status": "passed"` を含む JSON が表示され、失敗すると終了コード 1 になります。
+
+### GitHub Actions
+
+`.github/workflows/verify.yml` は、`main` への push、`main` を対象とする pull request、Actions 画面からの手動実行（`workflow_dispatch`）で検証します。
+Ubuntu 24.04 / Node.js 24 の環境で、次の順に実行します。
+
+1. `npm ci` でロック済みの依存関係を導入。
+2. `npm run test:install:ci` で Chromium とシステム依存ライブラリを導入。
+3. `npm test` で既存の全検証を実行。
+4. 生成済みの出力ファイルを `rtos-verification` アーティファクトとして 14 日間保存。
+
+結果は Actions の「Verify RTOS simulator」で確認できます。途中で失敗した場合も、生成済みのファイルがあれば保存します。ファイル生成前の失敗ではアーティファクトはありません。ジョブ全体の制限時間は 15 分です。
+`index.html`、モデル仕様、`tests/verify.cjs` の検証ロジックと期待値は変更していません。
 
 ## 参照
 
