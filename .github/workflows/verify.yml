@@ -31,6 +31,11 @@ jobs:
       - name: Install Chromium and system dependencies
         run: npm run test:install:ci
 
+      - name: Resolve verification output directory
+        id: outputs
+        # upload-artifact requires an absolute path without '..' segments.
+        run: echo "path=$(realpath -m "$GITHUB_WORKSPACE/../scratch/rtos-verification")" >> "$GITHUB_OUTPUT"
+
       - name: Run existing verification
         run: npm test
 
@@ -40,6 +45,6 @@ jobs:
         with:
           name: rtos-verification
           # Keep the existing output path in tests/verify.cjs unchanged.
-          path: ${{ github.workspace }}/../scratch/rtos-verification/
+          path: ${{ steps.outputs.outputs.path }}
           if-no-files-found: warn
           retention-days: 14
